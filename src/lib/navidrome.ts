@@ -1,4 +1,5 @@
 import type { NavidromeConfig } from '../types/navidrome'
+import { buildConnectionFailureMessage, getConnectionPreflightError } from './connectionDiagnostics'
 import { buildSubsonicAuthParams } from './subsonicAuth'
 import { normalizeServerUrl } from './urlUtils'
 
@@ -58,15 +59,18 @@ async function subsonicRequest(
   endpoint: string,
   params: Record<string, string> = {},
 ): Promise<Response> {
+  const preflightError = getConnectionPreflightError(config.serverUrl)
+  if (preflightError) {
+    throw new Error(preflightError)
+  }
+
   const url = buildApiUrl(config, endpoint, params)
 
   let response: Response
   try {
     response = await fetch(url)
   } catch {
-    throw new Error(
-      'Impossible de joindre le serveur. Vérifiez l’URL ou les restrictions CORS de Navidrome.',
-    )
+    throw new Error(buildConnectionFailureMessage(config.serverUrl))
   }
 
   if (!response.ok) {

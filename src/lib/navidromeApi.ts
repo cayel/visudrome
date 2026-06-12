@@ -1,7 +1,13 @@
 import type { NavidromeConfig } from '../types/navidrome'
+import { buildConnectionFailureMessage, getConnectionPreflightError } from './connectionDiagnostics'
 import { normalizeServerUrl } from './urlUtils'
 
 async function loginNavidrome(config: NavidromeConfig): Promise<string> {
+  const preflightError = getConnectionPreflightError(config.serverUrl)
+  if (preflightError) {
+    throw new Error(preflightError)
+  }
+
   const base = normalizeServerUrl(config.serverUrl)
   let response: Response
 
@@ -15,7 +21,7 @@ async function loginNavidrome(config: NavidromeConfig): Promise<string> {
       }),
     })
   } catch {
-    throw new Error('Impossible de joindre le serveur Navidrome')
+    throw new Error(buildConnectionFailureMessage(config.serverUrl))
   }
 
   if (!response.ok) {

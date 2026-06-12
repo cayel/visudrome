@@ -1,6 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { PwaInstallCard } from '../components/PwaInstallCard'
 import { useNavidrome } from '../context/NavidromeContext'
+import { getConnectionPreflightError } from '../lib/connectionDiagnostics'
 import { testConnection } from '../lib/navidrome'
 import { hasStoredProfile, loadStoredProfile } from '../lib/storage'
 import type { NavidromeConfig } from '../types/navidrome'
@@ -17,6 +19,8 @@ export function SettingsPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const sessionExpired = !config && hasStoredProfile()
+  const urlWarning = useMemo(() => getConnectionPreflightError(serverUrl), [serverUrl])
+  const pageIsSecure = window.location.protocol === 'https:'
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -69,11 +73,18 @@ export function SettingsPage() {
       )}
 
       <p className="alert alert-info settings-cors-alert">
-        Visudrome s&apos;exécute dans votre navigateur et appelle directement votre serveur Navidrome. Navidrome
-        autorise en général les origines tierces (CORS). Si la connexion échoue malgré des identifiants corrects,
-        vérifiez qu&apos;aucun reverse proxy ne bloque les requêtes cross-origin depuis{' '}
-        <strong>{window.location.origin}</strong>.
+        Visudrome ({window.location.origin}) appelle <strong>directement</strong> votre Navidrome depuis votre
+        navigateur — jamais via nos serveurs.
+        {pageIsSecure && (
+          <>
+            {' '}
+            En production HTTPS, Navidrome doit aussi être accessible en <strong>https://</strong> (contenu mixte
+            sinon).
+          </>
+        )}
       </p>
+
+      {urlWarning && <p className="alert alert-error settings-url-alert">{urlWarning}</p>}
 
       <form onSubmit={handleSubmit} className="glass-panel form-panel">
         <div className="form-stack">
@@ -135,6 +146,8 @@ export function SettingsPage() {
           )}
         </div>
       </form>
+
+      <PwaInstallCard />
     </div>
   )
 }

@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:lan": "vite preview --host 0.0.0.0 --port 5174",
+    "start:lan": "npm run build && npm run preview:lan",
+    "generate:icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
     "dexie": "^4.4.3",
@@ -32,10 +35,12 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "fake-indexeddb": "^6.2.5",
     "globals": "^17.6.0",
+    "sharp": "^0.35.1",
     "tailwindcss": "^4.3.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",
+    "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.8"
   }
 }
