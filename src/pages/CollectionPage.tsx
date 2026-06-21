@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useNavidrome } from '../context/NavidromeContext'
 import { AlbumSearchResults } from '../components/AlbumSearchResults'
 import { CollectionViewToggle } from '../components/CollectionViewToggle'
@@ -74,12 +75,52 @@ function getActiveFilterLabels(filters: AlbumSearchFilters): string[] {
 
 export function CollectionPage() {
   const { config } = useNavidrome()
+  const [searchParams] = useSearchParams()
+  const radarHydrated = useRef(false)
   const { filters, setFilters, resetFilters, results, facets, loading, ready, error } = useAlbumSearch(config)
   const filtersActive = useMemo(() => hasActiveFilters(filters), [filters])
   const advancedActive = useMemo(() => hasAdvancedFilters(filters), [filters])
   const activeLabels = useMemo(() => getActiveFilterLabels(filters), [filters])
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [viewMode, setViewMode] = useState<CollectionViewMode>(() => getStoredCollectionViewMode())
+
+  useEffect(() => {
+    if (radarHydrated.current) return
+    const rs = searchParams.get('rs')
+    const yf = searchParams.get('yf')
+    const yt = searchParams.get('yt')
+    const g = searchParams.get('g')
+    const hasRadarParams = Boolean(
+      rs || (yf && yf.trim()) || (yt && yt.trim()) || (g && g.trim()),
+    )
+    if (!hasRadarParams) return
+
+    radarHydrated.current = true
+
+    const patch: Partial<AlbumSearchFilters> = {}
+    if (rs === 'unchecked' || rs === 'partial' || rs === 'fully-rated') {
+      patch.ratingStatus = rs
+    }
+    const yFrom = yf ? parseOptionalYear(yf) : undefined
+    const yTo = yt ? parseOptionalYear(yt) : undefined
+    if (yFrom !== undefined) patch.yearFrom = yFrom
+    if (yTo !== undefined) patch.yearTo = yTo
+    if (g && g.trim()) {
+      const trimmed = g.trim()
+      try {
+        patch.genre = decodeURIComponent(trimmed)
+      } catch {
+        // Séquence % invalide dans l'URL : on n'applique pas le filtre genre.
+      }
+    }
+
+    setFilters((prev) => ({ ...prev, ...patch }))
+    if (patch.genre || patch.yearFrom !== undefined || patch.yearTo !== undefined) {
+      queueMicrotask(() => {
+        setAdvancedOpen(true)
+      })
+    }
+  }, [searchParams, setFilters])
 
   function handleViewModeChange(mode: CollectionViewMode) {
     setViewMode(mode)

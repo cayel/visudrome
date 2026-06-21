@@ -1,0 +1,5 @@
+# Configuration BMad (TOML) — lue par bmad-customize à l’activation.
+# Les clés usuelles : user_name, communication_language
+
+user_name = "Utilisateur"
+communication_language = "fr"

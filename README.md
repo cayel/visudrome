@@ -25,6 +25,11 @@ L’application démarre sur [http://localhost:5174](http://localhost:5174).
 | `npm run preview` | Prévisualisation du build |
 | `npm run test` | Tests unitaires (Vitest) |
 | `npm run lint` | ESLint |
+| `npm run preview:lan` | Prévisualisation du build accessible sur le LAN (`0.0.0.0:5174`) |
+| `npm run start:lan` | Build + prévisualisation LAN |
+| `npm run generate:icons` | Régénère les icônes PWA (`public/app-icon.svg`) |
+| `npm run bmad:catalog` | Régénère `_bmad/_config/bmad-help.csv` depuis `.agents/skills/` |
+| `npm run bmad:help` | Rappel : `bmad-help` = skill Cursor (chat), pas une commande shell |
 
 ## Configuration Navidrome
 
@@ -62,6 +67,19 @@ Base Dexie `visudrome` :
 - Données locales liées au navigateur et à l’origine du site ; vider les données du site supprime le cache.
 - Seuls les albums **100 % notés** entrent dans le classement « Meilleurs disques ».
 - En cas d’égalité de note, le disque avec le **plus de titres** est classé devant.
+
+## BMad (agents & workflows)
+
+Le dépôt inclut des skills Cursor sous **`.agents/skills/`** et une couche projet **`_bmad/`** :
+
+- **`_bmad/_config/bmad-help.csv`** — catalogue pour l’invocation **`bmad-help`** (phases, chemins de sortie).
+- **`_bmad/config.yaml`** et **`_bmad/bmm/config.yaml`** — langue, nom du projet, dossiers de livrables (`docs/bmad/`).
+- **`_bmad/config.toml`** — paramètres lus par **`bmad-customize`** ; surcharges d’équipe dans **`_bmad/custom/`** (voir `_bmad/README.md`).
+- **`_bmad/scripts/resolve_customization.py`** — fusion `customize.toml` + overrides (Python 3.11+).
+
+Après ajout ou mise à jour de skills : `npm run bmad:catalog`. Surcharges perso : copier `_bmad/bmm/config.user.yaml.example` vers `_bmad/bmm/config.user.yaml` (ignoré par git).
+
+**`bmad-help` n’est pas une commande shell** — c’est une skill Cursor : pose la question dans le chat (ex. « bmad-help »). En terminal, pour un rappel : `npm run bmad:help`.
 
 ## Stack
 

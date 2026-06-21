@@ -1,5 +1,6 @@
 import type { ArtistCount, GenreCount, RatedAlbum, YearCount } from '../../types/navidrome'
-import type { DashboardData } from '../dashboardTypes'
+import type { DashboardData, RatingSnapshot } from '../dashboardTypes'
+import type { GenreLink, StoredAlbum } from './schema'
 import { db } from './index'
 
 const TOP_ARTISTS_LIMIT = 20
@@ -19,8 +20,7 @@ export async function getAlbumCount(configKey: string): Promise<number> {
   return db.albums.where('configKey').equals(configKey).count()
 }
 
-export async function getYearData(configKey: string): Promise<YearCount[]> {
-  const albums = await db.albums.where('configKey').equals(configKey).toArray()
+function computeYearDataFromAlbums(albums: StoredAlbum[]): YearCount[] {
   const yearCounts = new Map<number, number>()
 
   for (const album of albums) {
@@ -34,8 +34,7 @@ export async function getYearData(configKey: string): Promise<YearCount[]> {
     .sort((a, b) => a.year - b.year)
 }
 
-export async function getTopArtists(configKey: string): Promise<ArtistCount[]> {
-  const albums = await db.albums.where('configKey').equals(configKey).toArray()
+function computeTopArtistsFromAlbums(albums: StoredAlbum[]): ArtistCount[] {
   const artistCounts = new Map<string, { count: number; artistId?: string }>()
 
   for (const album of albums) {
@@ -52,9 +51,7 @@ export async function getTopArtists(configKey: string): Promise<ArtistCount[]> {
     .slice(0, TOP_ARTISTS_LIMIT)
 }
 
-export async function getTopGenres(configKey: string): Promise<GenreCount[]> {
-  const albums = await db.albums.where('configKey').equals(configKey).toArray()
-  const genreLinks = await db.genreLinks.where('configKey').equals(configKey).toArray()
+function computeTopGenresFromAlbums(albums: StoredAlbum[], genreLinks: GenreLink[]): GenreCount[] {
   const genreIdByName = new Map(genreLinks.map((link) => [link.name, link.genreId]))
   const genreCounts = new Map<string, number>()
 
@@ -72,6 +69,36 @@ export async function getTopGenres(configKey: string): Promise<GenreCount[]> {
     }))
     .sort((a, b) => b.count - a.count || a.genre.localeCompare(b.genre, 'fr'))
     .slice(0, TOP_GENRES_LIMIT)
+}
+
+function computeRatingSnapshotFromAlbums(albums: StoredAlbum[]): RatingSnapshot {
+  let fullyRated = 0
+  let partialRated = 0
+  let unchecked = 0
+
+  for (const album of albums) {
+    if (!album.ratingCheckedAt) unchecked += 1
+    else if (!album.fullyRated) partialRated += 1
+    else fullyRated += 1
+  }
+
+  return { fullyRated, partialRated, unchecked }
+}
+
+export async function getYearData(configKey: string): Promise<YearCount[]> {
+  const albums = await db.albums.where('configKey').equals(configKey).toArray()
+  return computeYearDataFromAlbums(albums)
+}
+
+export async function getTopArtists(configKey: string): Promise<ArtistCount[]> {
+  const albums = await db.albums.where('configKey').equals(configKey).toArray()
+  return computeTopArtistsFromAlbums(albums)
+}
+
+export async function getTopGenres(configKey: string): Promise<GenreCount[]> {
+  const albums = await db.albums.where('configKey').equals(configKey).toArray()
+  const genreLinks = await db.genreLinks.where('configKey').equals(configKey).toArray()
+  return computeTopGenresFromAlbums(albums, genreLinks)
 }
 
 export async function getTopRatedAlbums(configKey: string): Promise<RatedAlbum[]> {
@@ -94,18 +121,17 @@ export async function getTopRatedAlbums(configKey: string): Promise<RatedAlbum[]
 }
 
 export async function buildDashboardData(configKey: string): Promise<DashboardData> {
-  const [albumCount, yearData, topArtists, topGenres] = await Promise.all([
-    getAlbumCount(configKey),
-    getYearData(configKey),
-    getTopArtists(configKey),
-    getTopGenres(configKey),
+  const [albums, genreLinks] = await Promise.all([
+    db.albums.where('configKey').equals(configKey).toArray(),
+    db.genreLinks.where('configKey').equals(configKey).toArray(),
   ])
 
   return {
-    albumCount,
-    yearData,
-    topArtists,
-    topGenres,
+    albumCount: albums.length,
+    yearData: computeYearDataFromAlbums(albums),
+    topArtists: computeTopArtistsFromAlbums(albums),
+    topGenres: computeTopGenresFromAlbums(albums, genreLinks),
+    ratingSnapshot: computeRatingSnapshotFromAlbums(albums),
   }
 }
 

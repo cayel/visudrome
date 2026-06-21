@@ -1,0 +1,10 @@
+# Config module BMM (Building Method) — utilisée par bmad-prd et workflows alignés.
+# Fusion logique : valeurs ici + user-config.yaml à la racine _bmad/ si présent.
+
+project_name: Visudrome
+user_name: ""
+communication_language: fr
+document_output_language: fr
+planning_artifacts: docs/bmad/planning
+# Dossier des livrables BMad (index, scan state, project-context.md, etc.)
+project_knowledge: docs/bmad

@@ -1,0 +1,5 @@
+# Surcharges utilisateur (optionnel).
+# Copier les clés de config.yaml et ajuster sans modifier le fichier partagé.
+
+# user_name: "Christophe"
+# communication_language: fr

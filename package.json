@@ -12,7 +12,9 @@
     "preview": "vite preview",
     "preview:lan": "vite preview --host 0.0.0.0 --port 5174",
     "start:lan": "npm run build && npm run preview:lan",
-    "generate:icons": "node scripts/generate-pwa-icons.mjs"
+    "generate:icons": "node scripts/generate-pwa-icons.mjs",
+    "bmad:catalog": "node scripts/generate-bmad-help-csv.mjs",
+    "bmad:help": "node scripts/bmad-help-hint.mjs"
   },
   "dependencies": {
     "dexie": "^4.4.3",

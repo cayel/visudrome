@@ -1,0 +1,16 @@
+# Configuration racine BMad — Visudrome
+# Les agents résolvent {project-root} depuis la racine du dépôt.
+
+project_name: Visudrome
+user_name: "" # ex. "Christophe" — laisser vide pour un ton neutre
+communication_language: fr
+document_output_language: fr
+
+# Dossier principal des livrables BMad (PRD, briefs, research, etc.)
+planning_artifacts: docs/bmad/planning
+
+# Dossier BMad (doc projet, index, scan) — project-context.md y est créé par bmad-generate-project-context
+project_knowledge: docs/bmad
+
+# Résolution des chemins dans bmad-help.csv ({project-root} = racine git)
+output_root: "{project-root}"

@@ -4,6 +4,7 @@ import { TopArtistsRanking } from '../components/TopArtistsRanking'
 import { TopGenresRanking } from '../components/TopGenresRanking'
 import { TopAlbumsRanking } from '../components/TopAlbumsRanking'
 import { RatingSyncProgressBar } from '../components/RatingSyncProgressBar'
+import { CollectionRadar } from '../components/CollectionRadar'
 import { useNavidrome } from '../context/NavidromeContext'
 import { aggregateByDecade, getDominantYears } from '../lib/decades'
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -178,6 +179,8 @@ export function DashboardPage() {
           )}
         </article>
       </div>
+
+      <CollectionRadar data={data ?? undefined} decadeData={decadeData} loading={isInitialLoading} error={sectionError} />
 
       {config && (
         <section className="dashboard-section dashboard-section-top-albums" aria-labelledby="dashboard-section-top-albums">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import { buildConfigKey } from '../lib/cacheUtils'
 import {
   DEFAULT_ALBUM_SEARCH_FILTERS,
@@ -13,7 +13,7 @@ import type { NavidromeConfig } from '../types/navidrome'
 
 interface UseAlbumSearchResult {
   filters: AlbumSearchFilters
-  setFilters: (next: AlbumSearchFilters) => void
+  setFilters: Dispatch<SetStateAction<AlbumSearchFilters>>
   resetFilters: () => void
   results: AlbumSearchResult[]
   facets: AlbumSearchFacets | null

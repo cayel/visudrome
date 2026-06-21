@@ -29,3 +29,11 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+__pycache__/
+*.py[cod]
+
+# BMad — overrides personnelles
+_bmad/config.user.toml
+_bmad/custom/*.user.toml
+_bmad/bmm/config.user.yaml
